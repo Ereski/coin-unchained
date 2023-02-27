@@ -1,0 +1,4 @@
+/whitepaper.*
+!/whitepaper.bib
+!/whitepaper.tex
+!/whitepaper.pdf

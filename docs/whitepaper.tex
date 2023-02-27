@@ -1,0 +1,112 @@
+\documentclass[twocolumn, a4paper]{article}
+
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{polyglossia}
+\usepackage[
+    unicode,
+    pdftitle={The Coin Unchanined Network},
+    pdfauthor={Carol Schulze},
+    colorlinks = true,
+    allcolors = blue
+]{hyperref}
+
+\setmainlanguage{english}
+
+\title{\textbf{The Coin Unchained Network}\\[14pt]\large Protocol Version 0.1.0}
+\author{Carol Schulze}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+    Coin Unchained is a novel concensus network based on the idea of \emph{individual convergent concensus}, where nodes converge on a concensus without explicit agreement. Instead, every node has acces to the same shared, signed, append-only database with which all legitimate nodes use to arrive to compatible \emph{local} conclusions, thereby converging on a concensus without the need for complex concensus protocols. Actors "pay" for participation in the network by verifying transactions and hunting for malicious actors, thus creating an environment highly resistant to rule-breakers while also avoiding useless work common to proof-of-work blockchains and complex proof-of-stake schemes.
+\end{abstract}
+
+\section{Overview}
+
+Coin Unchained is organized in three levels:
+
+\begin{itemize}
+    \item The overlay network: virtual network created by connected nodes. Unlike most P2P overlay networks, the topology is randomized and unremarkable due to gossip protocols.
+    \item The database: the shared record of all \emph{relevant} transactions in the network. Actors may be blacklisted for trying to subvert the rules, and in that case their records need not be kept.
+    \item Ancillary Coins (A-Coins): the network currency. Unlike bitcoin or ether, A-coins cannot be traded and have a maximum cap for each actor. A-coins are required to use the network, and are gained by maintaining it.
+\end{itemize}
+
+Coin Unchained's network does not rely on traditional miners and their usefulness is limited. Instead, every user of the network must also contribute to it. Thus the health and integrity of the network is actively maintained by relevant participants, creating \emph{confidence} in a trustless system.
+
+Even in the face of sybil attacks, every transaction is verifiable thus making it feasible to weed out bad actors regardless of how much of the network they control. On the other hand, with increased confidence (and assuming \emph{some} legitimate nodes in the network) it is possible for less strict applications to accept transactions as valid without actually verifying it as it will almost certainly be flagged as invalid in due time.
+
+\section{The Database}
+
+The whole network relies on a shared database. Every item in the database is a signed transaction that refers both to its author and an application (see section \ref{sec:applications}), plus extra metadata (see subsection \ref{ssec:transactions}). Transactions are ordered in a strict linear sequence, and any attempts to meddle with this sequence will lead to a ban from the network when detected (see subsection \ref{ssec:trust}).
+
+The design of this database is heavily based on Secure-Scuttlebutt\cite{kermarrec21}. We define the database as a collection of transactions. Each transaction contains, among other things, the ID of the actor that created it, the application for which the transaction refers, a monotonic sequence number, and a cryptographic signature the encompass the current and the previous transaction in the sequence.
+
+Transactions form a linear sequence when grouped by $(\text{author ID}, \text{application ID})$. New transactions are propagated through a simple gossip protocol where nodes push all transactions that other nodes are missing. To shut off write access to bad actors, each actor has their own list of $(\text{author ID}, \text{application ID})$ that it accepts, and all legitimate nodes should converge to the same list.
+
+When detected, bad actors are blacklisted and their transactions purged. New actors also require a proof of work to reduce the impact of spamming.
+
+Both sybil attacks and spamming are severely restricted. Once a transaction is created and spread to the rest of the network it is effectively commited. While it is possible (but extremely unlikely, see subsection \ref{ssec:sybil}) to control the flow of information throughout the network, once a transaction is received and verified by a node it is permanent. Short of breaking into a node and modifying its database, or breaking the underlying crypto, no amount of computing power, monetary power, or time allows an attacker to manipulate history or the validity of individual transactions. Furthemore, nodes will keep trying to spread the transactions they know about in a random fashion (see section \ref{sec:overlay}), so confining transactions to any subsection of the network requires an effective and permanent split.
+
+\subsection{Transactions}
+\label{ssec:transactions}
+
+A transaction is an authenticated object containing the following pieces of information:
+
+\begin{itemize}
+    \item The ID of the transaction's author, as a SHA3-256 hash of their public key.
+    \item The ID of the application as a transaction reference.
+    \item A monotonic sequence number that must be increased by one for every new transaction in a $(\text{author ID}, \text{application ID})$ pair.
+    \item A proof-of-work to reduce spamming.
+    \item A message for the application.
+    \item A cryptographic signature of the whole transaction.
+\end{itemize}
+
+\subsection{Actors and Nodes}
+
+Trusted actors "introduce" new actors in their own transaction logs.
+
+\section{Overlay Network}
+\label{sec:overlay}
+
+\section{Claims and Certification}
+
+Positive certification fulfills multiple purposes:
+
+\begin{itemize}
+    \item It allows nodes to probabilistically accept the transaction as valid without needing to actually validate the transaction by themselves. This is useful for applications that can recover from invalid transactions that are only uncovered at a later date.
+    \item Makes sure every transaction is validated by multiple actors, reducing the chance of invalid transactions. Invalid transactions can be certified by malicious actors, though having enough malicious nodes with enough trust to be able to certify an invalid transaction is expensive. It is also an extremely dangerous gambit as such attempts are almost guaranteed to be quickly uncovered and harshly punished by legitimate nodes in the network.
+    \item Makes sure the transaction is actually known by multiple nodes, and manipulation attempts easier to detect and punish.
+\end{itemize}
+
+Plus, verification in general is necessary for a healthy network.
+
+\section{Emergent Properties}
+
+\subsection{Trust}
+\label{ssec:trust}
+
+\subsection{Vets}
+
+\subsection{State}
+
+\section{Applications}
+\label{sec:applications}
+
+\section{Attack Scenarios}
+
+\subsection{Sybil Attacks}
+\label{ssec:sybil}
+
+\subsection{Timestamp Spoofing}
+
+\section{Wants}
+
+Verifiable timestamp on transactions and transaction timeout.
+
+\bibliographystyle{plain}
+\bibliography{whitepaper}
+
+\end{document}
